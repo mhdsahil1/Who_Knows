@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon/icon_adaptive_foreground_trans.png" alt="Who Knows! Icon" width="180"/>
+<img src="assets/icon/icon_adaptive_foreground_solid.png" alt="Icon" width="180"/>
 
 # 👁️ Who Knows!
 
