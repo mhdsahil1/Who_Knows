@@ -4,8 +4,10 @@
 
 # 👁️ Who Knows!
 
-### 🕵️ Someone knows the word.  
-### Someone doesn't.  
+### 🕵️ Someone knows the word.
+
+### Someone doesn't.
+
 ### Someone is lying.
 
 **A chaotic local pass-and-play social deduction party game.**
@@ -276,7 +278,7 @@ flutter devices
 
 Clone the repository:
 
-git clone <repository-url>
+git clone https://github.com/mhdsahil1/Who_Knows
 cd who_knows
 
 Install dependencies:
@@ -404,13 +406,4 @@ Test on Android before submitting major changes.
 
 License information will be added when the project's distribution model is finalized.
 
-<div align="center">
-👁️ WHO KNOWS?
-Someone knows.
-Someone doesn't.
-Someone is lying.
-<br/>
-
-Find them.
-
-</div> ```
+```
