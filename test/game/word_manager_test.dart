@@ -70,8 +70,8 @@ void main() {
       expect(WordDatabase.allWords.length, greaterThanOrEqualTo(200));
     });
 
-    test('has 12 categories', () {
-      expect(WordDatabase.categories.length, equals(12));
+    test('has at least 12 categories', () {
+      expect(WordDatabase.categories.length, greaterThanOrEqualTo(12));
     });
 
     test('every word has non-empty word and category', () {

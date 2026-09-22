@@ -10,24 +10,29 @@ class WordManager {
 
   WordManager({Random? random}) : _random = random ?? Random();
 
-  /// Pick a random word matching the given filters.
+  /// Pick a random word matching the given filters or from the supplied [runtimePool].
   /// Returns null if no eligible words remain.
   Word? pickWord({
     String? category,
     Set<String>? categories,
+    List<Word>? runtimePool,
   }) {
     final effectiveCategories =
         categories ?? (category != null ? {category} : null);
-    final candidates = WordDatabase.getWords(
-      categories: effectiveCategories,
-    ).where((w) => !_usedWords.contains(w.word)).toList();
+    final allEligible = runtimePool ??
+        WordDatabase.getWords(
+          categories: effectiveCategories,
+        );
+    final candidates =
+        allEligible.where((w) => !_usedWords.contains(w.word)).toList();
 
     if (candidates.isEmpty) {
       // All words used — reset and try again.
       _usedWords.clear();
-      final fresh = WordDatabase.getWords(
-        categories: effectiveCategories,
-      );
+      final fresh = runtimePool ??
+          WordDatabase.getWords(
+            categories: effectiveCategories,
+          );
       if (fresh.isEmpty) return null;
       final word = fresh[_random.nextInt(fresh.length)];
       _usedWords.add(word.word);
@@ -40,14 +45,16 @@ class WordManager {
   }
 
   /// Pick [count] unique words from the eligible pool.
-  /// Returns null if fewer than [count] distinct eligible words exist in the database.
+  /// Returns null if fewer than [count] distinct eligible words exist in the database or pool.
   List<Word>? pickUniqueWords(
     int count, {
     Set<String>? categories,
+    List<Word>? runtimePool,
   }) {
-    final allEligible = WordDatabase.getWords(
-      categories: categories,
-    );
+    final allEligible = runtimePool ??
+        WordDatabase.getWords(
+          categories: categories,
+        );
 
     if (allEligible.length < count) {
       return null;

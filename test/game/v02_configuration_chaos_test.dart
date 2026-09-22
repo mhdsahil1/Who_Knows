@@ -352,7 +352,7 @@ void main() {
       for (var i = 1; i <= 6; i++) {
         engine.addPlayer('P$i');
       }
-      engine.setGameMode(GameMode.chaos);
+      engine.setImposterMode(ImposterMode.chaos);
       engine.setWordDistribution(WordDistribution.unique);
       expect(engine.startGame(), isNull);
 
@@ -366,7 +366,7 @@ void main() {
       for (var i = 1; i <= 10; i++) {
         engine.addPlayer('P$i');
       }
-      engine.setGameMode(GameMode.chaos);
+      engine.setImposterMode(ImposterMode.chaos);
       engine.setWordDistribution(WordDistribution.unique);
       expect(engine.startGame(), isNull);
 
@@ -382,7 +382,7 @@ void main() {
         engine.addPlayer('P$i');
       }
       engine.setSelectedCategories({'Food'});
-      engine.setGameMode(GameMode.chaos);
+      engine.setImposterMode(ImposterMode.chaos);
       engine.setWordDistribution(WordDistribution.unique);
       expect(engine.startGame(), isNull);
 
@@ -404,7 +404,7 @@ void main() {
       for (var i = 1; i <= 4; i++) {
         engine.addPlayer('P$i');
       }
-      engine.setGameMode(GameMode.chaos);
+      engine.setImposterMode(ImposterMode.chaos);
       engine.setWordDistribution(WordDistribution.unique);
 
       // Seed engine where determineChaosImposterCount returns 4

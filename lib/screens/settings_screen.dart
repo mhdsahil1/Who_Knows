@@ -10,6 +10,8 @@ import '../theme/wk_colors.dart';
 import '../theme/wk_typography.dart';
 import '../widgets/responsive_scaffold.dart';
 import '../widgets/toggle_option.dart';
+import 'associated_words_screen.dart';
+import 'my_words_screen.dart';
 
 /// Settings screen for audio, haptics, and game info.
 class SettingsScreen extends StatefulWidget {
@@ -107,6 +109,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 28),
 
+                  _sectionHeader('WORD MANAGEMENT'),
+                  _navigationTile(
+                    label: 'My Words',
+                    subtitle: '${engine.myWordsService.count} custom words',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider.value(
+                            value: engine,
+                            child: const MyWordsScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _navigationTile(
+                    label: 'Associated Words',
+                    subtitle:
+                        '${engine.associatedWordsService.totalCount} generic words',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider.value(
+                            value: engine,
+                            child: const AssociatedWordsScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 28),
 
                   _sectionHeader('ABOUT & INFO'),
                   _infoTile('App Version', '1.0.0 (Release)'),
@@ -119,6 +153,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 24),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navigationTile({
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: WKColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: WKColors.blackMedium),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: WKTypography.bodyLarge.copyWith(
+                      color: WKColors.offWhite,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: WKTypography.bodySmall.copyWith(
+                      color: WKColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: WKColors.textMuted,
+              size: 22,
             ),
           ],
         ),

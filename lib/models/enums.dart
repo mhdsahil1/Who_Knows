@@ -50,6 +50,6 @@ enum WordDistribution {
 
 /// Game mode.
 enum GameMode {
-  normal,
-  chaos,
+  classic,
+  oneShotVote,
 }

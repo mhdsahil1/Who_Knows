@@ -9,9 +9,9 @@ import '../widgets/leave_game_dialog.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/responsive_scaffold.dart';
 import '../widgets/setup_progress.dart';
-import 'game_config_screen.dart';
+import 'game_mode_screen.dart';
 
-/// Setup Step 1/4 — WHO'S PLAYING?
+/// Setup Step 1/5 — WHO'S PLAYING?
 class PlayerSetupScreen extends StatefulWidget {
   const PlayerSetupScreen({super.key});
 
@@ -91,7 +91,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                       ),
                     ),
                     const Spacer(),
-                    const SetupProgress(step: 1, total: 4),
+                    const SetupProgress(step: 1, total: 5),
                     const Spacer(),
                     const SizedBox(width: 24), // balance
                   ],
@@ -261,7 +261,7 @@ class _PlayerSetupScreenState extends State<PlayerSetupScreen> {
                             MaterialPageRoute(
                               builder: (_) => ChangeNotifierProvider.value(
                                 value: engine,
-                                child: const GameConfigScreen(),
+                                child: const GameModeScreen(),
                               ),
                             ),
                           );

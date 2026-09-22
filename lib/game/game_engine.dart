@@ -3,10 +3,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../constants/game_constants.dart';
+import '../data/word_database.dart';
 import '../models/enums.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../models/player.dart';
+import '../models/word.dart';
+import '../services/associated_words_service.dart';
+import '../services/my_words_service.dart';
 import 'role_manager.dart';
 import 'win_condition.dart';
 import 'word_manager.dart';
@@ -20,19 +24,32 @@ class GameEngine extends ChangeNotifier {
   final WordManager _wordManager;
   final RoleManager _roleManager;
   final WinCondition _winCondition;
+  final MyWordsService _myWordsService;
+  final AssociatedWordsService _associatedWordsService;
 
   GameEngine({
     GameState? initialState,
     WordManager? wordManager,
     RoleManager? roleManager,
     WinCondition? winCondition,
+    MyWordsService? myWordsService,
+    AssociatedWordsService? associatedWordsService,
   })  : _state = initialState ?? GameState(),
         _wordManager = wordManager ?? WordManager(),
         _roleManager = roleManager ?? RoleManager(),
-        _winCondition = winCondition ?? const WinCondition();
+        _winCondition = winCondition ?? const WinCondition(),
+        _myWordsService = myWordsService ?? MyWordsService(),
+        _associatedWordsService =
+            associatedWordsService ?? AssociatedWordsService();
 
   /// Read-only access to current state.
   GameState get state => _state;
+
+  /// Access to My Words service.
+  MyWordsService get myWordsService => _myWordsService;
+
+  /// Access to Associated Words service.
+  AssociatedWordsService get associatedWordsService => _associatedWordsService;
 
   // ── Phase: LOBBY → PLAYER_SETUP ─────────────────────
 
@@ -176,6 +193,30 @@ class GameEngine extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggle My Words enabled.
+  void setMyWordsEnabled(bool enabled) {
+    _state.settings = _state.settings.copyWith(myWordsEnabled: enabled);
+    notifyListeners();
+  }
+
+  /// Toggle Associated Words enabled.
+  void setAssociatedWordsEnabled(bool enabled) {
+    _state.settings = _state.settings.copyWith(associatedWordsEnabled: enabled);
+    notifyListeners();
+  }
+
+  /// Toggle Can Imposter Start.
+  void setCanImposterStart(bool enabled) {
+    _state.settings = _state.settings.copyWith(canImposterStart: enabled);
+    notifyListeners();
+  }
+
+  /// Toggle Imposters Know Each Other.
+  void setImpostersKnowEachOther(bool enabled) {
+    _state.settings = _state.settings.copyWith(impostersKnowEachOther: enabled);
+    notifyListeners();
+  }
+
   /// Helper to determine weighted random imposter count for Chaos Mode.
   int determineChaosImposterCount(int playerCount, [Random? random]) {
     final rng = random ?? Random();
@@ -229,15 +270,45 @@ class GameEngine extends ChangeNotifier {
       return 'Maximum ${GameConstants.maxPlayers} players allowed';
     }
 
-    // Validate categories
-    if (_state.settings.selectedCategories.isEmpty) {
+    // Validate categories & word sources
+    if (_state.settings.selectedCategories.isEmpty &&
+        !_state.settings.myWordsEnabled &&
+        !_state.settings.associatedWordsEnabled) {
       return 'Choose at least one category.';
+    }
+
+    // Build candidate runtime word pool
+    final candidatePool = <Word>[];
+
+    if (_state.settings.selectedCategories.isNotEmpty) {
+      candidatePool.addAll(
+        WordDatabase.getWords(categories: _state.settings.selectedCategories),
+      );
+    }
+
+    if (_state.settings.myWordsEnabled) {
+      candidatePool.addAll(
+        _myWordsService.words.map(
+          (w) => Word(word: w.text, category: 'My Words'),
+        ),
+      );
+    }
+
+    if (_state.settings.associatedWordsEnabled) {
+      candidatePool.addAll(
+        _associatedWordsService.allWords.map(
+          (w) => Word(word: w.text, category: 'Associated Words'),
+        ),
+      );
+    }
+
+    if (candidatePool.isEmpty) {
+      return 'No words available for the selected categories/sources.';
     }
 
     // Determine Imposter count
     int effectiveImposters;
-    final isChaos = _state.settings.gameMode == GameMode.chaos ||
-        _state.settings.imposterMode == ImposterMode.chaos;
+    final isChaos = _state.settings.imposterMode == ImposterMode.chaos;
 
     if (isChaos) {
       effectiveImposters = determineChaosImposterCount(_state.players.length);
@@ -266,15 +337,15 @@ class GameEngine extends ChangeNotifier {
         return 'Imposter count cannot exceed player count';
       }
       if (effectiveImposters > 0 &&
-          effectiveImposters >= _state.players.length) {
+          effectiveImposters >= _state.players.length &&
+          _state.settings.imposterMode != ImposterMode.custom) {
         return 'Imposter count must be less than player count';
       }
     }
 
-    // Update settings with effective count and mode
+    // Update settings with effective count
     _state.settings = _state.settings.copyWith(
       imposterCount: effectiveImposters,
-      gameMode: isChaos ? GameMode.chaos : GameMode.normal,
     );
 
     final allowAll =
@@ -284,17 +355,32 @@ class GameEngine extends ChangeNotifier {
     if (_state.settings.wordDistribution == WordDistribution.unique) {
       final uniqueWords = _wordManager.pickUniqueWords(
         _state.players.length,
-        categories: _state.settings.selectedCategories,
+        runtimePool: candidatePool,
       );
       if (uniqueWords == null) {
         return 'Not enough unique words for Chaos Words.';
       }
-      _state.assignedChaosWords = uniqueWords;
-      _state.currentWord = uniqueWords.first;
+
+      // Dynamic player association for any associated words in uniqueWords
+      final resolvedWords = <Word>[];
+      for (var i = 0; i < uniqueWords.length; i++) {
+        final w = uniqueWords[i];
+        if (w.category == 'Associated Words') {
+          final p = _state.players[i];
+          resolvedWords.add(
+            Word(word: "${p.name}'s ${w.word}", category: 'Associated Words'),
+          );
+        } else {
+          resolvedWords.add(w);
+        }
+      }
+
+      _state.assignedChaosWords = resolvedWords;
+      _state.currentWord = resolvedWords.first;
 
       final assignment = _roleManager.assignRoles(
         players: _state.players,
-        uniqueWords: uniqueWords,
+        uniqueWords: resolvedWords,
         imposterCount: effectiveImposters,
         allowAllImposters: allowAll,
       );
@@ -310,17 +396,28 @@ class GameEngine extends ChangeNotifier {
       }
     } else {
       final word = _wordManager.pickWord(
-        categories: _state.settings.selectedCategories,
+        runtimePool: candidatePool,
       );
       if (word == null) {
         return 'No words available for the selected categories';
       }
-      _state.currentWord = word;
-      _state.assignedChaosWords = [word];
+
+      Word effectiveWord = word;
+      if (word.category == 'Associated Words') {
+        final active = _state.activePlayers;
+        final randomPlayer = active[Random().nextInt(active.length)];
+        effectiveWord = Word(
+          word: "${randomPlayer.name}'s ${word.word}",
+          category: 'Associated Words',
+        );
+      }
+
+      _state.currentWord = effectiveWord;
+      _state.assignedChaosWords = [effectiveWord];
 
       final assignment = _roleManager.assignRoles(
         players: _state.players,
-        word: word,
+        word: effectiveWord,
         imposterCount: effectiveImposters,
         allowAllImposters: allowAll,
       );
@@ -335,6 +432,14 @@ class GameEngine extends ChangeNotifier {
         }
       }
     }
+
+    // Select starting player randomly according to canImposterStart
+    final active = _state.activePlayers;
+    final civilians = active.where((p) => p.isCivilian).toList();
+    final eligible = (!_state.settings.canImposterStart && civilians.isNotEmpty)
+        ? civilians
+        : active;
+    _state.startingPlayerId = eligible[Random().nextInt(eligible.length)].id;
 
     _state.roundNumber = 1;
     _state.phase = GamePhase.roleReveal;
@@ -408,9 +513,99 @@ class GameEngine extends ChangeNotifier {
     return true;
   }
 
-  /// Confirm the group's vote for the selected player and process elimination.
-  bool confirmGroupVote() {
+  /// Toggle selection of an accused player (used for multi-imposter One-Shot Vote).
+  bool toggleAccusedPlayer(String playerId, {int? maxSelectable}) {
     if (_state.phase != GamePhase.voting) return false;
+
+    final isValid = _state.activePlayers.any((p) => p.id == playerId);
+    if (!isValid) return false;
+
+    final current = List<String>.from(_state.selectedAccusedPlayerIds);
+    if (current.contains(playerId)) {
+      current.remove(playerId);
+    } else {
+      if (maxSelectable != null && current.length >= maxSelectable) {
+        return false; // Reached maximum selectable players
+      }
+      current.add(playerId);
+    }
+
+    _state.selectedAccusedPlayerIds = current;
+    notifyListeners();
+    return true;
+  }
+
+  /// Dedicated method to resolve a One-Shot Vote.
+  /// Supports single player ID, list of IDs, or uses selectedAccusedPlayerIds.
+  /// Validates players, marks vote completed, determines winner, and routes to voteResult.
+  bool resolveOneShotVote([dynamic playerInput]) {
+    if (_state.oneShotVoteCompleted) return false;
+    if (_state.phase != GamePhase.voting) return false;
+
+    List<String> targetIds;
+    if (playerInput is String) {
+      targetIds = [playerInput];
+    } else if (playerInput is List<String>) {
+      targetIds = List<String>.from(playerInput);
+    } else {
+      targetIds = List<String>.from(_state.selectedAccusedPlayerIds);
+    }
+
+    if (targetIds.isEmpty) return false;
+
+    final targets = <Player>[];
+    for (final id in targetIds) {
+      final targetIndex = _state.players.indexWhere((p) => p.id == id);
+      if (targetIndex == -1) return false;
+
+      final target = _state.players[targetIndex];
+      if (!target.isActive) return false;
+      targets.add(target);
+    }
+
+    _state.oneShotVoteCompleted = true;
+    _state.selectedAccusedPlayerIds = targetIds;
+
+    for (final target in targets) {
+      target.eliminate();
+    }
+    _state.eliminatedPlayer = targets.first;
+
+    // Civilians only win if they chose ALL imposters and NO innocent civilians
+    final totalImposters = _state.players.where((p) => p.isImposter).toList();
+    final allChosenAreImposters = targets.every((p) => p.isImposter);
+    final caughtAllImposters =
+        allChosenAreImposters && targets.length == totalImposters.length;
+
+    if (caughtAllImposters) {
+      _state.caughtImposter = targets.first;
+      if (!_state.settings.finalGuessEnabled) {
+        _state.winner = Winner.civilians;
+      }
+      _state.phase = GamePhase.voteResult;
+    } else {
+      _state.caughtImposter = null;
+      _state.winner = Winner.imposters;
+      _state.phase = GamePhase.voteResult;
+    }
+
+    notifyListeners();
+    return true;
+  }
+
+  /// Confirm the group's vote for the selected player and process elimination.
+  bool confirmGroupVote([dynamic targetInput]) {
+    if (_state.phase != GamePhase.voting) return false;
+    if (targetInput is String) {
+      _state.selectedAccusedPlayerIds = [targetInput];
+    } else if (targetInput is List<String>) {
+      _state.selectedAccusedPlayerIds = List<String>.from(targetInput);
+    }
+
+    if (_state.settings.gameMode == GameMode.oneShotVote) {
+      return resolveOneShotVote();
+    }
+
     final accusedId = _state.selectedAccusedPlayerId;
     if (accusedId == null) return false;
 
@@ -464,6 +659,21 @@ class GameEngine extends ChangeNotifier {
   /// Explicit alias for proceedFromVoteResult.
   void processVoteResult() {
     if (_state.phase != GamePhase.voteResult) return;
+
+    if (_state.settings.gameMode == GameMode.oneShotVote) {
+      if (_state.caughtImposter != null && _state.settings.finalGuessEnabled) {
+        startFinalGuess();
+      } else {
+        if (_state.caughtImposter != null) {
+          _state.winner = Winner.civilians;
+        } else {
+          _state.winner = Winner.imposters;
+        }
+        _state.phase = GamePhase.gameOver;
+        notifyListeners();
+      }
+      return;
+    }
 
     if (_state.caughtImposter != null) {
       if (_state.settings.finalGuessEnabled) {
@@ -533,6 +743,18 @@ class GameEngine extends ChangeNotifier {
   /// Reset round state and start next discussion round.
   void startNextRound() {
     _state.resetForNewRound();
+    if (_state.startingPlayer == null || !_state.startingPlayer!.isActive) {
+      final active = _state.activePlayers;
+      if (active.isNotEmpty) {
+        final civilians = active.where((p) => p.isCivilian).toList();
+        final eligible =
+            (!_state.settings.canImposterStart && civilians.isNotEmpty)
+                ? civilians
+                : active;
+        _state.startingPlayerId =
+            eligible[Random().nextInt(eligible.length)].id;
+      }
+    }
     _state.phase = GamePhase.discussion;
     notifyListeners();
   }
@@ -548,6 +770,9 @@ class GameEngine extends ChangeNotifier {
     _state.phase = GamePhase.playerSetup;
     notifyListeners();
   }
+
+  /// Alias for resetting game for a new round of play.
+  void resetForNewGame() => restartGame();
 
   /// Return to lobby screen.
   void returnToLobby() {

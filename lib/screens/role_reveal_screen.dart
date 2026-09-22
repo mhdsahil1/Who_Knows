@@ -168,7 +168,7 @@ class _RoleRevealScreenState extends State<RoleRevealScreen> {
                   child: RevealGesture(
                     accentColor: playerAccent,
                     onRevealed: _onRevealed,
-                    hiddenContent: _buildRoleContent(player),
+                    hiddenContent: _buildRoleContent(player, engine),
                   ),
                 ),
                 const Spacer(flex: 2),
@@ -199,7 +199,7 @@ class _RoleRevealScreenState extends State<RoleRevealScreen> {
     );
   }
 
-  Widget _buildRoleContent(Player player) {
+  Widget _buildRoleContent(Player player, GameEngine engine) {
     final isImposter = player.role == PlayerRole.imposter;
     final accentColor = isImposter ? WKColors.red : WKColors.green;
 
@@ -256,6 +256,66 @@ class _RoleRevealScreenState extends State<RoleRevealScreen> {
               ),
             ),
             const SizedBox(height: 12),
+          ],
+          if (engine.state.settings.impostersKnowEachOther) ...[
+            () {
+              final totalImposters =
+                  engine.state.players.where((p) => p.isImposter).length;
+              if (totalImposters >= 2) {
+                final teammates = engine.state.players
+                    .where((p) => p.isImposter && p.id != player.id)
+                    .map((p) => p.name)
+                    .toList();
+                if (teammates.isNotEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      children: [
+                        Text(
+                          'YOUR TEAMMATES',
+                          style: WKTypography.label.copyWith(
+                            color: WKColors.red,
+                            letterSpacing: 2,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: WKColors.surfaceElevated,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: WKColors.red.withValues(alpha: 0.3)),
+                          ),
+                          child: Column(
+                            children: teammates
+                                .map(
+                                  (name) => Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 2),
+                                    child: Text(
+                                      '• $name',
+                                      style: WKTypography.bodyMedium.copyWith(
+                                        color: WKColors.offWhite,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              }
+              return const SizedBox.shrink();
+            }(),
           ],
           Text(
             'Blend in. Listen carefully. Do not get caught.',

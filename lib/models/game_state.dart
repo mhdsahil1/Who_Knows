@@ -15,8 +15,21 @@ class GameState {
   /// Index of the player currently being revealed (during roleReveal phase).
   int currentRevealIndex;
 
-  /// The player selected by the group to accuse (during voting phase).
-  String? selectedAccusedPlayerId;
+  /// The players selected by the group to accuse (during voting phase).
+  List<String> selectedAccusedPlayerIds;
+
+  /// Backwards-compatible getter for single accused player ID.
+  String? get selectedAccusedPlayerId =>
+      selectedAccusedPlayerIds.isNotEmpty ? selectedAccusedPlayerIds.first : null;
+
+  /// Backwards-compatible setter for single accused player ID.
+  set selectedAccusedPlayerId(String? id) {
+    if (id == null) {
+      selectedAccusedPlayerIds = [];
+    } else {
+      selectedAccusedPlayerIds = [id];
+    }
+  }
 
   /// The player eliminated in the most recent group vote.
   Player? eliminatedPlayer;
@@ -30,6 +43,12 @@ class GameState {
   /// Unique words assigned in Chaos Words mode.
   List<Word> assignedChaosWords;
 
+  /// The player selected to start the verbal clue phase.
+  String? startingPlayerId;
+
+  /// Whether the one-shot vote has been completed (for One-Shot Vote mode).
+  bool oneShotVoteCompleted;
+
   GameState({
     this.phase = GamePhase.lobby,
     List<Player>? players,
@@ -38,18 +57,33 @@ class GameState {
     this.roundNumber = 1,
     this.winner = Winner.none,
     this.currentRevealIndex = 0,
-    this.selectedAccusedPlayerId,
+    List<String>? selectedAccusedPlayerIds,
+    String? selectedAccusedPlayerId,
     this.eliminatedPlayer,
     this.caughtImposter,
     this.finalGuessText,
     List<Word>? assignedChaosWords,
+    this.startingPlayerId,
+    this.oneShotVoteCompleted = false,
   })  : players = players ?? [],
         settings = settings ?? GameSettings(),
-        assignedChaosWords = assignedChaosWords ?? [];
+        assignedChaosWords = assignedChaosWords ?? [],
+        selectedAccusedPlayerIds = selectedAccusedPlayerIds ??
+            (selectedAccusedPlayerId != null ? [selectedAccusedPlayerId] : []);
+
+  /// The player selected to start the verbal clue phase.
+  Player? get startingPlayer {
+    if (startingPlayerId == null) return null;
+    final matches = players.where((p) => p.id == startingPlayerId);
+    return matches.isNotEmpty ? matches.first : null;
+  }
 
   /// Current phase of the game (alias for [phase]).
   GamePhase get currentPhase => phase;
   set currentPhase(GamePhase newPhase) => phase = newPhase;
+
+  /// Current round number (alias for [roundNumber]).
+  int get currentRound => roundNumber;
 
   /// Convenience getters for active configuration.
   bool get finalGuessEnabled => settings.finalGuessEnabled;
@@ -64,6 +98,10 @@ class GameState {
   /// All players who have been eliminated.
   List<Player> get eliminatedPlayers =>
       players.where((p) => p.isEliminated).toList();
+
+  /// All players selected by the group to accuse.
+  List<Player> get selectedAccusedPlayers =>
+      players.where((p) => selectedAccusedPlayerIds.contains(p.id)).toList();
 
   /// Active imposters.
   List<Player> get activeImposters =>
@@ -109,6 +147,8 @@ class GameState {
     eliminatedPlayer = null;
     caughtImposter = null;
     finalGuessText = null;
+    startingPlayerId = null;
+    oneShotVoteCompleted = false;
     assignedChaosWords.clear();
     for (final player in players) {
       player.status = PlayerStatus.active;

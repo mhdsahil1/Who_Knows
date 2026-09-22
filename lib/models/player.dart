@@ -27,6 +27,7 @@ class Player {
   }
 
   bool get isActive => status == PlayerStatus.active;
+  bool get isAlive => isActive;
   bool get isEliminated => status == PlayerStatus.eliminated;
   bool get isImposter => role == PlayerRole.imposter;
   bool get isCivilian => role == PlayerRole.civilian;

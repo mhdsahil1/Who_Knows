@@ -25,6 +25,7 @@ class CategoryIcon {
     'Music': Icons.music_note_rounded,
     'Places': Icons.place_rounded,
     'Professions': Icons.work_rounded,
+    'Jobs': Icons.work_rounded,
     'Clothing': Icons.checkroom_rounded,
     'Household': Icons.home_rounded,
     'Games': Icons.sports_esports_rounded,
@@ -33,6 +34,11 @@ class CategoryIcon {
     'Emotions': Icons.emoji_emotions_rounded,
     'Colors': Icons.palette_rounded,
     'Science': Icons.science_rounded,
+    'Random': Icons.shuffle_rounded,
+    'Heroes & Superpowers': Icons.bolt_rounded,
+    'Famous People': Icons.star_rounded,
+    'Brands': Icons.local_offer_rounded,
+    'Brand': Icons.local_offer_rounded,
   };
 
   /// Get the icon for a category name, case-insensitive.

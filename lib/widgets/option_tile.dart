@@ -65,14 +65,16 @@ class OptionTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        title,
-                        style: WKTypography.headingSmall.copyWith(
-                          color: isSelected
-                              ? WKColors.black
-                              : WKColors.textPrimary,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1,
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: WKTypography.headingSmall.copyWith(
+                            color: isSelected
+                                ? WKColors.black
+                                : WKColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
                         ),
                       ),
                       if (badge != null) ...[

@@ -14,6 +14,10 @@ class GameSettings {
   final bool soundEnabled;
   final bool vibrationEnabled;
   final bool showHintToImposter;
+  final bool myWordsEnabled;
+  final bool associatedWordsEnabled;
+  final bool canImposterStart;
+  final bool impostersKnowEachOther;
 
   GameSettings({
     this.imposterCount = GameConstants.defaultImposterCount,
@@ -21,12 +25,16 @@ class GameSettings {
     this.customImposterCount = 1,
     Set<String>? selectedCategories,
     String? selectedCategory,
-    this.gameMode = GameMode.normal,
+    this.gameMode = GameMode.classic,
     this.wordDistribution = WordDistribution.shared,
     this.finalGuessEnabled = true,
     this.soundEnabled = true,
     this.vibrationEnabled = true,
     this.showHintToImposter = true,
+    this.myWordsEnabled = false,
+    this.associatedWordsEnabled = false,
+    this.canImposterStart = true,
+    this.impostersKnowEachOther = false,
   }) : selectedCategories = selectedCategory != null
             ? {selectedCategory}
             : (selectedCategories ?? WordDatabase.categories.toSet());
@@ -48,6 +56,10 @@ class GameSettings {
     bool? soundEnabled,
     bool? vibrationEnabled,
     bool? showHintToImposter,
+    bool? myWordsEnabled,
+    bool? associatedWordsEnabled,
+    bool? canImposterStart,
+    bool? impostersKnowEachOther,
   }) {
     Set<String>? resolvedCategories;
     if (clearCategory) {
@@ -71,6 +83,12 @@ class GameSettings {
       soundEnabled: soundEnabled ?? this.soundEnabled,
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
       showHintToImposter: showHintToImposter ?? this.showHintToImposter,
+      myWordsEnabled: myWordsEnabled ?? this.myWordsEnabled,
+      associatedWordsEnabled:
+          associatedWordsEnabled ?? this.associatedWordsEnabled,
+      canImposterStart: canImposterStart ?? this.canImposterStart,
+      impostersKnowEachOther:
+          impostersKnowEachOther ?? this.impostersKnowEachOther,
     );
   }
 
@@ -80,5 +98,7 @@ class GameSettings {
       'custom: $customImposterCount, cats: ${selectedCategories.length}, '
       'gameMode: $gameMode, dist: $wordDistribution, finalGuess: $finalGuessEnabled, '
       'sound: $soundEnabled, vib: $vibrationEnabled, '
-      'showHint: $showHintToImposter)';
+      'showHint: $showHintToImposter, myWords: $myWordsEnabled, '
+      'assocWords: $associatedWordsEnabled, canImposterStart: $canImposterStart, '
+      'impostersKnowEachOther: $impostersKnowEachOther)';
 }

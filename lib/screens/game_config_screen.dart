@@ -14,7 +14,7 @@ import '../widgets/setup_progress.dart';
 import '../widgets/toggle_option.dart';
 import 'category_selection_screen.dart';
 
-/// Setup Step 2/4 — WHO DOESN'T KNOW?
+/// Setup Step 3/5 — WHO DOESN'T KNOW?
 /// Configures imposter count, chaos mode, chaos words, and final guess rule.
 class GameConfigScreen extends StatefulWidget {
   const GameConfigScreen({super.key});
@@ -37,8 +37,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     final engine = context.watch<GameEngine>();
     final settings = engine.state.settings;
     final playerCount = engine.state.players.length;
-    final isChaos = settings.imposterMode == ImposterMode.chaos ||
-        settings.gameMode == GameMode.chaos;
+    final isChaos = settings.imposterMode == ImposterMode.chaos;
     final isCustom = settings.imposterMode == ImposterMode.custom && !isChaos;
     final isFixed1 = settings.imposterMode == ImposterMode.fixed &&
         settings.imposterCount == 1 &&
@@ -70,7 +69,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       ),
                     ),
                     const Spacer(),
-                    const SetupProgress(step: 2, total: 4),
+                    const SetupProgress(step: 3, total: 5),
                     const Spacer(),
                     GestureDetector(
                       onTap: () => _onLeave(engine),
@@ -136,7 +135,6 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         HapticFeedback.selectionClick();
                         engine.setImposterMode(ImposterMode.fixed);
                         engine.setImposterCount(1);
-                        engine.setGameMode(GameMode.normal);
                       },
                     ),
                     const SizedBox(height: 10),
@@ -150,7 +148,6 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         HapticFeedback.selectionClick();
                         engine.setImposterMode(ImposterMode.fixed);
                         engine.setImposterCount(2);
-                        engine.setGameMode(GameMode.normal);
                       },
                     ),
                     const SizedBox(height: 10),
@@ -199,7 +196,6 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       onTap: () {
                         HapticFeedback.selectionClick();
                         engine.setImposterMode(ImposterMode.custom);
-                        engine.setGameMode(GameMode.normal);
                       },
                     ),
                     const SizedBox(height: 10),
@@ -215,7 +211,6 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       onTap: () {
                         HapticFeedback.selectionClick();
                         engine.setImposterMode(ImposterMode.chaos);
-                        engine.setGameMode(GameMode.chaos);
                       },
                     ),
                     const SizedBox(height: 28),
@@ -256,7 +251,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       const SizedBox(height: 28),
                     ],
 
-                    // Section: Rules / Final Guess
+                    // Section: Rules
                     Row(
                       children: [
                         Text(
@@ -268,9 +263,9 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         ),
                         const SizedBox(width: 8),
                         const InfoButton(
-                          title: 'FINAL GUESS RULE',
+                          title: 'GAME RULES',
                           explanation:
-                              'When ON, caught Imposters get one final chance to guess the secret word. If their guess matches, Imposters steal the win!',
+                              'Configure clue-giving, teamwork, and win condition rules.',
                         ),
                       ],
                     ),
@@ -284,6 +279,35 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         engine.setFinalGuessEnabled(val);
                       },
                     ),
+                    const SizedBox(height: 12),
+                    ToggleOption(
+                      label: 'IMPOSTER START',
+                      subtitle: 'Can the Imposter give the first clue?',
+                      value: settings.canImposterStart,
+                      trueText: 'YES',
+                      falseText: 'NO',
+                      onChanged: (val) {
+                        HapticFeedback.selectionClick();
+                        engine.setCanImposterStart(val);
+                      },
+                    ),
+                    if (isChaos ||
+                        isFixed2 ||
+                        (isCustom && settings.customImposterCount >= 2)) ...[
+                      const SizedBox(height: 12),
+                      ToggleOption(
+                        label: 'IMPOSTERS KNOW EACH OTHER?',
+                        subtitle:
+                            'Imposters see teammate names during role reveal',
+                        value: settings.impostersKnowEachOther,
+                        trueText: 'YES',
+                        falseText: 'NO',
+                        onChanged: (val) {
+                          HapticFeedback.selectionClick();
+                          engine.setImpostersKnowEachOther(val);
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 32),
                   ],
                 ),

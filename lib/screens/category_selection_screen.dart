@@ -13,10 +13,13 @@ import '../widgets/primary_button.dart';
 import '../widgets/responsive_scaffold.dart';
 import '../widgets/setup_progress.dart';
 import '../widgets/toggle_option.dart';
+import 'associated_words_screen.dart';
+import 'my_words_screen.dart';
 import 'ready_screen.dart';
 
-/// Setup Step 3/4 — CHOOSE YOUR WORDS
-/// Allows selecting word categories and toggling imposter category hints.
+/// Setup Step 4/5 — CHOOSE YOUR WORDS
+/// Allows selecting word categories, toggling personal word sources,
+/// and toggling imposter category hints.
 class CategorySelectionScreen extends StatefulWidget {
   const CategorySelectionScreen({super.key});
 
@@ -33,6 +36,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   void initState() {
     super.initState();
     final engine = context.read<GameEngine>();
+    engine.myWordsService.loadWords();
+    engine.associatedWordsService.loadWords();
     final current = engine.state.settings.selectedCategories;
     if (current.isNotEmpty) {
       _selectedCategories = Set<String>.from(current);
@@ -85,7 +90,6 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   }
 
   void _onNext(GameEngine engine) {
-    if (_selectedCategories.isEmpty) return;
     engine.setSelectedCategories(_selectedCategories);
 
     Navigator.of(context).push(
@@ -102,7 +106,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   Widget build(BuildContext context) {
     final engine = context.watch<GameEngine>();
     final settings = engine.state.settings;
-    final hasSelection = _selectedCategories.isNotEmpty;
+    final myWordsCount = engine.myWordsService.count;
+    final assocWordsCount = engine.associatedWordsService.totalCount;
+
+    final hasSelection = _selectedCategories.isNotEmpty ||
+        (settings.myWordsEnabled && myWordsCount > 0) ||
+        (settings.associatedWordsEnabled && assocWordsCount > 0);
 
     return PopScope(
       canPop: true,
@@ -125,7 +134,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       ),
                     ),
                     const Spacer(),
-                    const SetupProgress(step: 3, total: 4),
+                    const SetupProgress(step: 4, total: 5),
                     const Spacer(),
                     GestureDetector(
                       onTap: () => _onLeave(engine),
@@ -159,7 +168,73 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                         color: WKColors.textSecondary,
                       ),
                     ),
+                    const SizedBox(height: 24),
+
+                    // Section: PERSONAL WORD SOURCES
+                    Text(
+                      'PERSONAL WORD SOURCES',
+                      style: WKTypography.label.copyWith(
+                        color: WKColors.textMuted,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // My Words Card
+                    _buildPersonalSourceCard(
+                      title: 'MY WORDS',
+                      subtitle: '$myWordsCount words',
+                      description: 'Custom words created for your games.',
+                      isEnabled: settings.myWordsEnabled,
+                      onToggle: (val) {
+                        HapticFeedback.selectionClick();
+                        engine.setMyWordsEnabled(val);
+                      },
+                      onManage: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChangeNotifierProvider.value(
+                              value: engine,
+                              child: const MyWordsScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // Associated Words Card
+                    _buildPersonalSourceCard(
+                      title: 'ASSOCIATED WORDS',
+                      subtitle: '$assocWordsCount words',
+                      description:
+                          'Generic words dynamically combined with player names.',
+                      isEnabled: settings.associatedWordsEnabled,
+                      onToggle: (val) {
+                        HapticFeedback.selectionClick();
+                        engine.setAssociatedWordsEnabled(val);
+                      },
+                      onManage: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ChangeNotifierProvider.value(
+                              value: engine,
+                              child: const AssociatedWordsScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 20),
+
+                    // Section: BUILT-IN CATEGORIES
+                    Text(
+                      'BUILT-IN CATEGORIES',
+                      style: WKTypography.label.copyWith(
+                        color: WKColors.textMuted,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
                     // Quick action buttons
                     Row(
@@ -244,6 +319,126 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPersonalSourceCard({
+    required String title,
+    required String subtitle,
+    required String description,
+    required bool isEnabled,
+    required ValueChanged<bool> onToggle,
+    required VoidCallback onManage,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isEnabled ? WKColors.surface : WKColors.blackLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isEnabled ? WKColors.offWhite : WKColors.blackMedium,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: WKTypography.headingSmall.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                              color: isEnabled
+                                  ? WKColors.offWhite
+                                  : WKColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: WKColors.blackMedium,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            subtitle,
+                            style: WKTypography.label.copyWith(
+                              fontSize: 10,
+                              color: WKColors.textMuted,
+                              letterSpacing: 0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: WKTypography.bodySmall.copyWith(
+                        color: WKColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: isEnabled,
+                onChanged: onToggle,
+                activeThumbColor: WKColors.yellow,
+                activeTrackColor: WKColors.yellow.withValues(alpha: 0.3),
+                inactiveThumbColor: WKColors.textMuted,
+                inactiveTrackColor: WKColors.blackMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: onManage,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.settings_outlined,
+                      size: 14,
+                      color: WKColors.yellow,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'MANAGE',
+                      style: WKTypography.label.copyWith(
+                        fontSize: 11,
+                        color: WKColors.yellow,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

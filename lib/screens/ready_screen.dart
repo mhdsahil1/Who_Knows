@@ -44,8 +44,7 @@ class ReadyScreen extends StatelessWidget {
     final engine = context.watch<GameEngine>();
     final settings = engine.state.settings;
     final players = engine.state.players;
-    final isChaos = settings.imposterMode == ImposterMode.chaos ||
-        settings.gameMode == GameMode.chaos;
+    final isChaos = settings.imposterMode == ImposterMode.chaos;
 
     String imposterSummary;
     if (isChaos) {
@@ -77,7 +76,7 @@ class ReadyScreen extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    const SetupProgress(step: 4, total: 4),
+                    const SetupProgress(step: 5, total: 5),
                     const Spacer(),
                     GestureDetector(
                       onTap: () => _onLeave(context, engine),
@@ -127,8 +126,21 @@ class ReadyScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   children: [
                     _buildSummaryCard(
+                      label: 'GAME MODE',
+                      value: settings.gameMode == GameMode.oneShotVote
+                          ? 'ONE-SHOT VOTE'
+                          : 'CLASSIC MODE',
+                      detail: settings.gameMode == GameMode.oneShotVote
+                          ? 'One discussion. One vote. One chance.'
+                          : 'Keep voting until the Imposter is caught.',
+                      accentColor: settings.gameMode == GameMode.oneShotVote
+                          ? WKColors.red
+                          : WKColors.yellow,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSummaryCard(
                       label: 'PLAYERS',
-                      value: '${players.length} Players',
+                      value: '${players.length}',
                       detail: players.map((p) => p.name).join(', '),
                       accentColor: WKColors.yellow,
                     ),
@@ -150,11 +162,59 @@ class ReadyScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     _buildSummaryCard(
-                      label: 'RULES',
-                      value: 'Final Guess: ${settings.finalGuessEnabled ? "ON" : "OFF"}',
-                      detail: 'Show Hint to Imposters: ${settings.showHintToImposter ? "ON" : "OFF"}',
+                      label: 'FINAL GUESS',
+                      value: settings.finalGuessEnabled ? 'ON' : 'OFF',
+                      accentColor: settings.finalGuessEnabled
+                          ? WKColors.green
+                          : WKColors.textMuted,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSummaryCard(
+                      label: 'MY WORDS',
+                      value: settings.myWordsEnabled ? 'ON' : 'OFF',
+                      detail: settings.myWordsEnabled
+                          ? '${engine.myWordsService.count} custom words'
+                          : null,
+                      accentColor: settings.myWordsEnabled
+                          ? WKColors.yellow
+                          : WKColors.textMuted,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSummaryCard(
+                      label: 'ASSOCIATED WORDS',
+                      value: settings.associatedWordsEnabled ? 'ON' : 'OFF',
+                      detail: settings.associatedWordsEnabled
+                          ? '${engine.associatedWordsService.totalCount} generic words'
+                          : null,
+                      accentColor: settings.associatedWordsEnabled
+                          ? WKColors.yellow
+                          : WKColors.textMuted,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildSummaryCard(
+                      label: 'IMPOSTER START',
+                      value: settings.canImposterStart ? 'YES' : 'NO',
+                      detail: settings.canImposterStart
+                          ? 'Imposter can be selected as starting player'
+                          : 'Civilians only give the first clue',
                       accentColor: WKColors.offWhite,
                     ),
+                    if (isChaos ||
+                        settings.imposterCount >= 2 ||
+                        (settings.imposterMode == ImposterMode.custom &&
+                            settings.customImposterCount >= 2)) ...[
+                      const SizedBox(height: 12),
+                      _buildSummaryCard(
+                        label: 'IMPOSTER TEAMWORK',
+                        value: settings.impostersKnowEachOther ? 'YES' : 'NO',
+                        detail: settings.impostersKnowEachOther
+                            ? 'Imposters see teammate names during role reveal'
+                            : 'Imposters do not know other imposters',
+                        accentColor: settings.impostersKnowEachOther
+                            ? WKColors.red
+                            : WKColors.textMuted,
+                      ),
+                    ],
                   ],
                 ),
               ),

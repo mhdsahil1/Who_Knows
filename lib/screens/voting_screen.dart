@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../game/game_engine.dart';
+import '../models/enums.dart';
 import '../theme/wk_colors.dart';
 import '../theme/wk_typography.dart';
 import '../widgets/primary_button.dart';
@@ -10,12 +11,25 @@ import '../widgets/vote_player_tile.dart';
 
 /// Screen 8 — Group Vote:
 /// Only ONE player is chosen representing the group's collective decision.
-class VotingScreen extends StatelessWidget {
+/// Adapts UI and confirmation for Classic Mode vs One-Shot Vote.
+class VotingScreen extends StatefulWidget {
   const VotingScreen({super.key});
 
+  @override
+  State<VotingScreen> createState() => _VotingScreenState();
+}
+
+class _VotingScreenState extends State<VotingScreen> {
+  bool _isSubmitting = false;
+
   void _onConfirmVote(BuildContext context, GameEngine engine) async {
-    final selectedPlayer = engine.state.selectedAccusedPlayer;
-    if (selectedPlayer == null) return;
+    final selectedPlayers = engine.state.selectedAccusedPlayers;
+    if (selectedPlayers.isEmpty) return;
+    if (_isSubmitting || engine.state.oneShotVoteCompleted) return;
+
+    final isOneShot = engine.state.settings.gameMode == GameMode.oneShotVote;
+    final isMulti = selectedPlayers.length > 1;
+    final namesText = selectedPlayers.map((p) => p.name.toUpperCase()).join(' & ');
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -45,7 +59,7 @@ class VotingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'ACCUSE',
+              isOneShot ? 'FINAL VOTE' : 'ACCUSE',
               style: WKTypography.label.copyWith(
                 color: WKColors.textMuted,
                 letterSpacing: 2,
@@ -53,7 +67,7 @@ class VotingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              selectedPlayer.name.toUpperCase(),
+              namesText,
               style: WKTypography.headingLarge.copyWith(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
@@ -62,7 +76,11 @@ class VotingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Are you sure? This will eliminate them and reveal their role.',
+              isOneShot
+                  ? (isMulti
+                      ? 'Everyone agrees? You must catch ALL ${selectedPlayers.length} Imposters to win.'
+                      : 'Everyone agrees? This is your only vote.')
+                  : 'Are you sure? This will eliminate them and reveal their role.',
               style: WKTypography.bodyMedium.copyWith(
                 color: WKColors.textSecondary,
               ),
@@ -70,7 +88,7 @@ class VotingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             PrimaryButton(
-              text: 'CONFIRM ELIMINATION',
+              text: isOneShot ? 'CONFIRM VOTE' : 'CONFIRM ELIMINATION',
               color: WKColors.red,
               textColor: WKColors.offWhite,
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -85,9 +103,16 @@ class VotingScreen extends StatelessWidget {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
+      if (_isSubmitting || engine.state.oneShotVoteCompleted) return;
+      setState(() => _isSubmitting = true);
+
       HapticFeedback.heavyImpact();
-      engine.confirmGroupVote();
+      if (isOneShot) {
+        engine.resolveOneShotVote(selectedPlayers.map((p) => p.id).toList());
+      } else {
+        engine.confirmGroupVote();
+      }
     }
   }
 
@@ -95,12 +120,24 @@ class VotingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final engine = context.watch<GameEngine>();
     final activePlayers = engine.state.activePlayers;
-    final selectedId = engine.state.selectedAccusedPlayerId;
+    final selectedIds = engine.state.selectedAccusedPlayerIds;
+    final isOneShot = engine.state.settings.gameMode == GameMode.oneShotVote;
+    final isChaos = engine.state.settings.imposterMode == ImposterMode.chaos;
+    final totalImposters = isChaos
+        ? engine.state.activeImposters.length
+        : engine.state.settings.imposterCount;
+    final requiredCount = totalImposters < 1 ? 1 : totalImposters;
+    final isMultiImposter = isOneShot && requiredCount >= 2;
+    final isLocked = _isSubmitting || engine.state.oneShotVoteCompleted;
+
+    final isSelectionReady = isMultiImposter
+        ? selectedIds.length == requiredCount
+        : selectedIds.isNotEmpty;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) engine.startDiscussion();
+        if (!didPop && !isLocked) engine.startDiscussion();
       },
       child: ResponsiveScaffold(
         child: SafeArea(
@@ -114,19 +151,20 @@ class VotingScreen extends StatelessWidget {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => engine.startDiscussion(),
-                      child: const Icon(
+                      onTap: isLocked ? null : () => engine.startDiscussion(),
+                      child: Icon(
                         Icons.arrow_back_rounded,
-                        color: WKColors.textMuted,
+                        color: isLocked ? Colors.transparent : WKColors.textMuted,
                         size: 24,
                       ),
                     ),
                     const Spacer(),
                     Text(
-                      'GROUP ACCUSATION',
+                      isOneShot ? 'ONE SHOT' : 'VOTE',
                       style: WKTypography.label.copyWith(
-                        color: WKColors.textMuted,
+                        color: isOneShot ? WKColors.red : WKColors.textMuted,
                         letterSpacing: 2,
+                        fontWeight: isOneShot ? FontWeight.w800 : FontWeight.w600,
                       ),
                     ),
                     const Spacer(),
@@ -137,7 +175,7 @@ class VotingScreen extends StatelessWidget {
 
                 // Title
                 Text(
-                  "WHO'S THE\nIMPOSTER?",
+                  isMultiImposter ? "WHO ARE THE\nIMPOSTERS?" : "WHO'S THE\nIMPOSTER?",
                   style: WKTypography.displayMedium.copyWith(
                     height: 0.95,
                     letterSpacing: 2,
@@ -145,9 +183,14 @@ class VotingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choose the player your group agreed on.',
+                  isOneShot
+                      ? (isMultiImposter
+                          ? "Select all $requiredCount imposters (${selectedIds.length}/$requiredCount selected).\nIf even one choice is wrong, Imposters win!"
+                          : "This is your only vote. Choose the imposter.")
+                      : "Choose the player your group agreed on.",
                   style: WKTypography.bodyMedium.copyWith(
-                    color: WKColors.textSecondary,
+                    color: isOneShot ? WKColors.offWhite : WKColors.textSecondary,
+                    fontWeight: isOneShot ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -158,7 +201,7 @@ class VotingScreen extends StatelessWidget {
                     itemCount: activePlayers.length,
                     itemBuilder: (context, index) {
                       final player = activePlayers[index];
-                      final isSelected = selectedId == player.id;
+                      final isSelected = selectedIds.contains(player.id);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: VotePlayerTile(
@@ -166,7 +209,15 @@ class VotingScreen extends StatelessWidget {
                           number: index + 1,
                           isSelected: isSelected,
                           onTap: () {
-                            engine.selectAccusedPlayer(player.id);
+                            if (isLocked) return;
+                            if (isMultiImposter) {
+                              engine.toggleAccusedPlayer(
+                                player.id,
+                                maxSelectable: requiredCount,
+                              );
+                            } else {
+                              engine.selectAccusedPlayer(player.id);
+                            }
                           },
                         ),
                       );
@@ -177,10 +228,12 @@ class VotingScreen extends StatelessWidget {
 
                 // CTA: Confirm Vote
                 PrimaryButton(
-                  text: 'CONFIRM',
-                  color: selectedId != null ? WKColors.red : null,
-                  textColor: selectedId != null ? WKColors.offWhite : null,
-                  onPressed: selectedId != null
+                  text: isOneShot
+                      ? (isMultiImposter ? 'CONFIRM VOTE ($requiredCount)' : 'CONFIRM VOTE')
+                      : 'CONFIRM',
+                  color: isSelectionReady ? WKColors.red : null,
+                  textColor: isSelectionReady ? WKColors.offWhite : null,
+                  onPressed: (isSelectionReady && !isLocked)
                       ? () => _onConfirmVote(context, engine)
                       : null,
                 ),

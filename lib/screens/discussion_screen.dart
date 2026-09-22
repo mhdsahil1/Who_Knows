@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../game/game_engine.dart';
+import '../models/enums.dart';
 import '../theme/wk_colors.dart';
 import '../theme/wk_typography.dart';
 import '../widgets/leave_game_dialog.dart';
@@ -25,6 +26,9 @@ class DiscussionScreen extends StatelessWidget {
     final engine = context.watch<GameEngine>();
     final activeCount = engine.state.activePlayers.length;
     final roundNumber = engine.state.roundNumber;
+    final startingPlayer = engine.state.startingPlayer;
+    final isChaos =
+        engine.state.settings.imposterMode == ImposterMode.chaos;
 
     return PopScope(
       canPop: false,
@@ -81,14 +85,65 @@ class DiscussionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Someone here doesn\'t know.',
+                  isChaos
+                      ? 'Anyone could be an imposter.'
+                      : 'Someone here doesn\'t know.',
                   style: WKTypography.bodyLarge.copyWith(
                     color: WKColors.textSecondary,
                     fontSize: 16,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 20),
+
+                // Starting player indicator
+                if (startingPlayer != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: WKColors.yellow.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: WKColors.yellow,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'FIRST CLUE',
+                          style: WKTypography.label.copyWith(
+                            color: WKColors.yellow,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          startingPlayer.name.toUpperCase(),
+                          style: WKTypography.headingMedium.copyWith(
+                            color: WKColors.offWhite,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "You're up first. Give your clue.",
+                          style: WKTypography.bodySmall.copyWith(
+                            color: WKColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Physical guidance card
                 Container(

@@ -10,6 +10,8 @@ class ToggleOption extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final VoidCallback? onInfo;
+  final String trueText;
+  final String falseText;
 
   const ToggleOption({
     super.key,
@@ -18,6 +20,8 @@ class ToggleOption extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.onInfo,
+    this.trueText = 'ON',
+    this.falseText = 'OFF',
   });
 
   @override
@@ -38,12 +42,14 @@ class ToggleOption extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      label,
-                      style: WKTypography.headingSmall.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1,
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: WKTypography.headingSmall.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
                     if (onInfo != null) ...[
@@ -88,13 +94,13 @@ class ToggleOption extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // ON / OFF selector
+          // Toggle selector
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildToggleChip('ON', value),
+              _buildToggleChip(trueText, value, true),
               const SizedBox(width: 6),
-              _buildToggleChip('OFF', !value),
+              _buildToggleChip(falseText, !value, false),
             ],
           ),
         ],
@@ -102,11 +108,11 @@ class ToggleOption extends StatelessWidget {
     );
   }
 
-  Widget _buildToggleChip(String text, bool isActive) {
+  Widget _buildToggleChip(String text, bool isActive, bool targetValue) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
-        onChanged(text == 'ON');
+        onChanged(targetValue);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

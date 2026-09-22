@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../game/game_engine.dart';
+import '../models/enums.dart';
 import '../theme/wk_colors.dart';
 import '../theme/wk_typography.dart';
 import '../widgets/primary_button.dart';
@@ -44,6 +45,12 @@ class _FinalGuessScreenState extends State<FinalGuessScreen> {
       return const SizedBox.shrink();
     }
 
+    final isOneShot = engine.state.settings.gameMode == GameMode.oneShotVote;
+    final caughtImposters = isOneShot && engine.state.selectedAccusedPlayers.length > 1
+        ? engine.state.selectedAccusedPlayers
+        : [caughtImposter];
+    final isMulti = caughtImposters.length > 1;
+
     return PopScope(
       canPop: false,
       child: ResponsiveScaffold(
@@ -63,17 +70,21 @@ class _FinalGuessScreenState extends State<FinalGuessScreen> {
                 const Spacer(flex: 1),
 
                 Text(
-                  caughtImposter.name.toUpperCase(),
+                  caughtImposters.map((p) => p.name.toUpperCase()).join(' & '),
                   style: WKTypography.displayLarge.copyWith(
-                    fontSize: 42,
+                    fontSize: isMulti ? 32 : 42,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2,
                   ),
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'You were caught. But you can still steal the win.',
+                  isMulti
+                      ? 'You were caught. But you can still steal the win together.'
+                      : 'You were caught. But you can still steal the win.',
                   style: WKTypography.bodyMedium.copyWith(
                     color: WKColors.textSecondary,
                   ),

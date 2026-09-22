@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../game/game_engine.dart';
+import '../models/enums.dart';
+import '../models/player.dart';
 import '../theme/wk_colors.dart';
 import '../theme/wk_typography.dart';
 import '../widgets/primary_button.dart';
@@ -48,14 +50,26 @@ class _VoteResultScreenState extends State<VoteResultScreen>
   @override
   Widget build(BuildContext context) {
     final engine = context.watch<GameEngine>();
-    final eliminated = engine.getLastEliminatedPlayer();
+    final isOneShot = engine.state.settings.gameMode == GameMode.oneShotVote;
+    final accusedPlayers = isOneShot && engine.state.selectedAccusedPlayers.isNotEmpty
+        ? engine.state.selectedAccusedPlayers
+        : (engine.getLastEliminatedPlayer() != null
+            ? [engine.getLastEliminatedPlayer()!]
+            : <Player>[]);
 
-    if (eliminated == null) {
+    if (accusedPlayers.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final isImposter = eliminated.isImposter;
-    final accentColor = isImposter ? WKColors.red : WKColors.green;
+    final isMulti = accusedPlayers.length > 1;
+    final totalImpostersCount =
+        engine.state.players.where((p) => p.isImposter).length;
+    final allAreImposters = accusedPlayers.every((p) => p.isImposter);
+    final caughtAllImposters = isOneShot
+        ? (allAreImposters && accusedPlayers.length == totalImpostersCount)
+        : accusedPlayers.first.isImposter;
+
+    final accentColor = caughtAllImposters ? WKColors.red : WKColors.green;
 
     return PopScope(
       canPop: false,
@@ -75,11 +89,11 @@ class _VoteResultScreenState extends State<VoteResultScreen>
                 ),
                 const Spacer(flex: 1),
 
-                // Eliminated player name
+                // Eliminated player name(s)
                 Text(
-                  eliminated.name.toUpperCase(),
+                  accusedPlayers.map((p) => p.name.toUpperCase()).join(' & '),
                   style: WKTypography.displayLarge.copyWith(
-                    fontSize: 40,
+                    fontSize: isMulti ? 32 : 40,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2,
                   ),
@@ -89,7 +103,7 @@ class _VoteResultScreenState extends State<VoteResultScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'WAS THE...',
+                  isMulti ? 'WERE THE...' : 'WAS THE...',
                   style: WKTypography.label.copyWith(
                     color: WKColors.textSecondary,
                     letterSpacing: 3,
@@ -109,10 +123,12 @@ class _VoteResultScreenState extends State<VoteResultScreen>
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: Text(
-                        isImposter ? 'IMPOSTER! 😈' : 'CIVILIAN! 😇',
+                        isMulti
+                            ? (caughtAllImposters ? 'IMPOSTERS! 😈' : 'NOT ALL IMPOSTERS! ❌')
+                            : (caughtAllImposters ? 'IMPOSTER! 😈' : 'CIVILIAN! 😇'),
                         style: WKTypography.displayMedium.copyWith(
-                          color: isImposter ? WKColors.offWhite : WKColors.black,
-                          fontSize: 32,
+                          color: caughtAllImposters ? WKColors.offWhite : WKColors.black,
+                          fontSize: isMulti ? 26 : 32,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2,
                         ),
@@ -133,11 +149,19 @@ class _VoteResultScreenState extends State<VoteResultScreen>
                     border: Border.all(color: WKColors.blackMedium),
                   ),
                   child: Text(
-                    isImposter
+                    caughtAllImposters
                         ? (engine.state.finalGuessEnabled
-                            ? "The group caught the Imposter!\nOne last chance for them to guess the secret word..."
-                            : "The group caught the Imposter!\nFinal Guess is OFF: Civilians win!")
-                        : "Oops! You eliminated an innocent civilian.\nThe real Imposter is still among you!",
+                            ? (isMulti
+                                ? "The group caught ALL Imposters!\nOne last chance for them to guess the secret word..."
+                                : "The group caught the Imposter!\nOne last chance for them to guess the secret word...")
+                            : (isMulti
+                                ? "The group caught ALL Imposters!\nFinal Guess is OFF: Civilians win!"
+                                : "The group caught the Imposter!\nFinal Guess is OFF: Civilians win!"))
+                        : (isOneShot
+                            ? (isMulti
+                                ? "Oops! You didn't catch all the Imposters correctly.\nWith only one vote, the Imposters win!"
+                                : "Oops! You eliminated an innocent civilian.\nWith only one vote, the Imposter wins!")
+                            : "Oops! You eliminated an innocent civilian.\nThe real Imposter is still among you!"),
                     style: WKTypography.bodyMedium.copyWith(
                       color: WKColors.offWhite,
                       height: 1.4,
@@ -149,18 +173,24 @@ class _VoteResultScreenState extends State<VoteResultScreen>
 
                 // Primary CTA
                 PrimaryButton(
-                  text: isImposter
+                  text: caughtAllImposters
                       ? (engine.state.finalGuessEnabled
                           ? 'FINAL GUESS'
                           : 'VIEW RESULTS')
-                      : 'CONTINUE DISCUSSION',
-                  color: isImposter ? WKColors.red : WKColors.green,
-                  textColor: isImposter ? WKColors.offWhite : WKColors.black,
-                  icon: isImposter
+                      : (isOneShot ? 'VIEW RESULTS' : 'CONTINUE DISCUSSION'),
+                  color: caughtAllImposters
+                      ? WKColors.red
+                      : (isOneShot ? WKColors.red : WKColors.green),
+                  textColor: (caughtAllImposters || isOneShot)
+                      ? WKColors.offWhite
+                      : WKColors.black,
+                  icon: caughtAllImposters
                       ? (engine.state.finalGuessEnabled
                           ? Icons.psychology_rounded
                           : Icons.emoji_events_rounded)
-                      : Icons.forum_rounded,
+                      : (isOneShot
+                          ? Icons.emoji_events_rounded
+                          : Icons.forum_rounded),
                   onPressed: () {
                     HapticFeedback.mediumImpact();
                     engine.proceedFromVoteResult();

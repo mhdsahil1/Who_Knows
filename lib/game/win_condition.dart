@@ -57,10 +57,26 @@ class WinCondition {
   }
 
   /// Compare the imposter's final guess to the secret word.
+  ///
+  /// For standard words, requires an exact (case-insensitive) match.
+  /// For associated words (e.g. "Asheel's Bike"), accepts either the full phrase
+  /// or the base generic word (e.g. "Bike"), but rejects player-only or other variants.
   bool checkFinalGuess({
     required String guess,
     required String secretWord,
   }) {
-    return guess.trim().toLowerCase() == secretWord.trim().toLowerCase();
+    final g = guess.trim().toLowerCase();
+    final s = secretWord.trim().toLowerCase();
+    if (g.isEmpty) return false;
+    if (g == s) return true;
+
+    // If secretWord is an associated word phrase (e.g. "Asheel's Bike"),
+    // also accept the base generic word (e.g. "Bike").
+    if (s.contains("'s ")) {
+      final baseWord = s.split("'s ").sublist(1).join("'s ").trim();
+      if (g == baseWord) return true;
+    }
+
+    return false;
   }
 }
