@@ -1,409 +1,582 @@
 <div align="center">
 
-<img src="assets/icon/icon_adaptive_foreground_solid.png" alt="Icon" width="180"/>
+<img src="assets/icon/icon_adaptive_foreground_solid.png" alt="Who Knows! Icon" width="180"/>
 
-# 👁️ Who Knows!
+# WHO KNOWS!
 
-### 🕵️ Someone knows the word.
+### A local social deduction party game built for real-world chaos.
 
-### Someone doesn't.
+<p>
+  <strong>Think.</strong>
+  <strong>Bluff.</strong>
+  <strong>Accuse.</strong>
+  <strong>Survive.</strong>
+</p>
 
-### Someone is lying.
+<br>
 
-**A chaotic local pass-and-play social deduction party game.**
-
-<br/>
-
-<a href="#-features">
-  <img src="https://img.shields.io/badge/🎮-Features-FFD60A?style=for-the-badge&labelColor=0D0D0D" alt="Features"/>
+<a href="#download">
+  <img src="https://img.shields.io/badge/Download-APK-000000?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
 </a>
-<a href="#-getting-started">
-  <img src="https://img.shields.io/badge/🚀-Get%20Started-4CC9F0?style=for-the-badge&labelColor=0D0D0D" alt="Get Started"/>
+<a href="#features">
+  <img src="https://img.shields.io/badge/Explore-Features-F5C400?style=for-the-badge" alt="Features"/>
 </a>
-<a href="#-gameplay">
-  <img src="https://img.shields.io/badge/🕵️-How%20It%20Works-06D6A0?style=for-the-badge&labelColor=0D0D0D" alt="How It Works"/>
+<a href="#game-modes">
+  <img src="https://img.shields.io/badge/Game-Modes-4DB6FF?style=for-the-badge" alt="Game Modes"/>
 </a>
 
-<br/><br/>
+<br><br>
 
-![Flutter](https://img.shields.io/badge/Flutter-3.47.4-02569B?style=flat-square&logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=flat-square&logo=dart&logoColor=white)
-![Android](https://img.shields.io/badge/Android-API%2036-3DDC84?style=flat-square&logo=android&logoColor=white)
-![Web](https://img.shields.io/badge/Web-Supported-4CC9F0?style=flat-square&logo=googlechrome&logoColor=white)
-
-<br/>
-
-**📱 One phone. 👥 A group of friends. 🕵️ One suspicious person.**
+<img src="https://readme-typing-svg.demolab.com?font=Space+Grotesk&weight=600&size=22&pause=1200&color=F5C400&center=true&vCenter=true&width=600&lines=One+phone.+A+group+of+friends.+One+imposter.;Trust+nobody.;Can+you+find+the+imposter%3F" alt="Animated tagline"/>
 
 </div>
 
 ---
 
-## 🎮 What is Who Knows!?
+## About
 
-**Who Knows!** is a local social deduction party game built with Flutter.
+**Who Knows!** is a mobile-first local social deduction party game designed for groups playing together in the same physical space.
 
-Everyone gathers around **one phone**.
+Everyone receives a secret word except the Imposter.
 
-The app secretly gives players their information.
+Players give verbal clues, discuss suspicious behavior, and collectively decide who they believe is the Imposter.
 
-Then the phone goes down.
+The catch?
 
-The humans take over.
+There is only one phone.
 
-Players give clues, argue, accuse their friends of crimes they probably didn't commit, and eventually agree on **one person** to eliminate.
-
-The app then reveals the truth.
-
-Simple.
-
-Until someone starts acting suspicious. 👀
+Pass it around. Keep your role secret. Bluff carefully.
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 ```text
-        👥 PLAYERS
-             │
-             ▼
-      ⚙️ GAME SETUP
-             │
-             ▼
-      📱 PASS THE PHONE
-             │
-             ▼
-       🔐 SECRET REVEAL
-             │
-             ▼
-       🗣️ GIVE CLUES
-             │
-             ▼
-        💬 DISCUSS
-             │
-             ▼
-       🕵️ PICK SUSPECT
-             │
-             ▼
-        🎯 REVEAL
-             │
-        ┌────┴────┐
-        ▼         ▼
-     IMPOSTER   CIVILIAN
-        │         │
-        ▼         ▼
-      😈        💀
-     CHAOS      OOPS
-🔥 The Core Idea
+        START
+          │
+          ▼
+     ADD PLAYERS
+          │
+          ▼
+      GAME MODE
+          │
+          ▼
+   IMPOSTER SETTINGS
+          │
+          ▼
+   WORDS & CATEGORIES
+          │
+          ▼
+      ROLE REVEAL
+          │
+          ▼
+      DISCUSSION
+          │
+          ▼
+         VOTE
+          │
+      ┌───┴────┐
+      │        │
+   CORRECT   WRONG
+      │        │
+      ▼        ▼
+    RESULT   NEXT ROUND
+```
 
-There is no individual voting.
+The game is designed around **pass-and-play** interaction.
 
-There is no typing clues into the phone.
+Players do not submit clues through the app. The conversation happens face-to-face.
 
-There is no online lobby.
+---
 
-There is just:
+## Features
 
-Talk → Suspect → Decide → Reveal
+### Local Pass-and-Play
 
-Because apparently getting five friends to agree on one person is harder than building the application.
+Designed for groups sitting together.
 
-🕵️ The Imposter
+- No accounts
+- No online matchmaking
+- No complicated setup
+- One device
+- Up to 20 players
 
-Most players receive the same secret word.
+The phone is simply passed from player to player during the private role reveal.
 
-The Imposter doesn't.
+---
 
-Example:
+## Game Modes
 
-Category: FOOD
+### Classic Mode
 
-Civilians:
-🍕 PIZZA
+Keep playing until the Imposter is successfully identified.
 
-Imposter:
-❓ ???
+```text
+Role Assignment
+      ↓
+Discussion
+      ↓
+Vote
+      ↓
+Correct?
+ ┌────┴────┐
+ YES       NO
+  ↓         ↓
+RESULT   NEW ROUND
+```
 
-The Imposter has to survive the conversation without knowing exactly what everyone is talking about.
+A wrong vote starts another round with a new role assignment.
 
-Good luck.
+### One-Shot Vote
 
-🌪️ Chaos Mode
+One discussion.
 
-Normal mode is already suspicious.
+One vote.
 
-Chaos Mode asks:
+One chance.
 
-"What if we made it worse?"
+The group gets exactly one opportunity to identify the Imposter.
 
-The game can randomly determine the number of Imposters.
+```text
+Role Assignment
+      ↓
+Discussion
+      ↓
+ONE VOTE
+      ↓
+   RESULT
+```
 
-Potentially:
+If the selected player is an Imposter, the Civilians succeed unless the Final Guess changes the outcome.
 
-0 Imposters
-1 Imposter
-2 Imposters
-3 Imposters
-...
-Everyone
+If the selected player is a Civilian, the Imposters win immediately.
 
-Yes.
+---
 
-Sometimes there may be nobody to catch.
+## Imposter System
 
-Sometimes there may be way too many people to catch.
+Who Knows! supports configurable Imposter behavior.
 
-Humanity has invented a party game that doesn't even guarantee the existence of a criminal.
+### Imposter Count
 
-🌀 Chaos Words
+The game can recommend an Imposter count based on the number of players while still allowing custom configuration.
 
-Normally:
+### Can Imposter Start?
 
-Player 1 → 🍕 Pizza
-Player 2 → 🍕 Pizza
-Player 3 → 🍕 Pizza
-Player 4 → ❓ ???
+Choose whether the randomly selected starting player can be an Imposter.
 
-With Chaos Words:
+If disabled, the starting player is selected from the Civilian players whenever possible.
 
-Player 1 → 🍕 Pizza
-Player 2 → 🍔 Burger
-Player 3 → 🌮 Taco
-Player 4 → 🍜 Ramen
+### Imposters Know Each Other
 
-Everyone walks into the discussion thinking they're right.
+When multiple Imposters are present, you can decide whether they should know the identities of their teammates.
 
-Which is exactly the problem.
+If enabled, Imposters privately see their fellow Imposters during role reveal.
 
-💡 Imposter Hint
+Civilians never receive this information.
 
-The Imposter can optionally receive a category hint.
+---
+
+## Chaos Mode
+
+For groups that prefer unpredictability.
+
+Chaos Mode can randomize the Imposter setup instead of following the standard configuration.
+
+### Chaos Words
+
+Players can receive different words.
+
+This creates a more unpredictable game where players cannot automatically assume that everyone received the same secret word.
+
+---
+
+## Final Guess
+
+Caught the Imposter?
+
+Not necessarily the end.
+
+When **Final Guess** is enabled, a caught Imposter gets one final opportunity to identify the secret word.
+
+```text
+IMPOSTER CAUGHT
+       │
+       ▼
+   FINAL GUESS
+       │
+   ┌───┴────┐
+ CORRECT   WRONG
+    │         │
+    ▼         ▼
+IMPOSTERS   CIVILIANS
+   WIN         WIN
+```
+
+For Associated Words, the final guess can use the associated phrase or its base word according to the game's rules.
+
+---
+
+## Word System
+
+Who Knows! supports multiple word sources.
+
+### Built-in Categories
+
+Choose from available categories such as:
+
+- Internet
+- School
+- Memes
+- Channels
+- Apps
+- Entertainment
+- And more
+
+Categories are dynamically derived from the word database.
+
+---
+
+### My Words
+
+Create your own private word collection.
+
+Custom words are stored locally and can be enabled during game setup.
+
+Useful for:
+
+- Inside jokes
+- Friend groups
+- College life
+- Local references
+- Personal themes
+
+---
+
+### Associated Words
+
+Associated Words dynamically attach a generic word to a player.
 
 For example:
 
-CATEGORY
-────────────
-FOOD
+```text
+Generic Word
+     ↓
+    Bike
+     ↓
+Selected Player
+     ↓
+   Sahil
+     ↓
+"Sahil's Bike"
+```
 
-WORD
-████████
+The association is generated dynamically instead of storing every possible player-word combination.
 
-The category is revealed.
+---
 
-The actual word isn't.
+## Player Setup
 
-Just enough information to make the Imposter dangerous.
+Who Knows! supports up to:
 
-🎯 Final Guess
+# 20 Players
 
-If enabled, catching the Imposter isn't necessarily the end.
+The setup process is divided into simple steps:
 
-The Imposter gets one final chance:
+```text
+01  Players
+ ↓
+02  Game Mode
+ ↓
+03  Imposter Settings
+ ↓
+04  Words & Categories
+ ↓
+05  Ready
+```
 
-Guess the secret word.
+The goal is to keep setup quick so the group can get into the game instead of spending five minutes configuring it.
 
-Correct:
+---
 
-😈 IMPOSTER WINS
+## Design
 
-Wrong:
+The interface follows a minimal visual language built around a controlled color palette:
 
-🎉 CIVILIANS WIN
+- Black
+- Off-white
+- Yellow
+- Sky Blue
+- Green
+- Controlled Red
 
-You can also disable Final Guess completely.
+The game uses an abstract **eye / observer** visual concept throughout the experience.
 
-✨ Features
-👥 3–20 players
-📱 Single-device pass-and-play
-🕵️ Imposter gameplay
-🌪️ Chaos Mode
-🌀 Chaos Words
-🗣️ Verbal clues
-🗳️ Collective voting
-💡 Optional Imposter category hint
-🎯 Optional Final Guess
-🗂️ Selectable word categories
-🎲 Random word selection
-🚫 No Easy / Medium / Hard word tiers
-🌐 Flutter Web support
-📱 Android support
-👁️ The Identity
+The idea is simple:
 
-The game's visual identity revolves around an abstract observer.
+> Someone is always watching.
 
-The eye represents the central question of the game:
+---
 
-Who knows?
+## Technology
 
-The launcher icon uses:
+<div align="center">
 
-🟨 Yellow background
-⚫ Black observer silhouette
-👁️ Yellow eye ring
-⚫ Black pupil
+<img src="https://img.shields.io/badge/Flutter-3.47.4-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter"/>
+<img src="https://img.shields.io/badge/Dart-Flutter-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart"/>
+<img src="https://img.shields.io/badge/Android-Primary-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
+<img src="https://img.shields.io/badge/Web-Supported-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Web"/>
 
-No giant text.
+</div>
 
-No neon cyberpunk explosion.
+### Core Stack
 
-Just an eye staring at your friend while they desperately pretend they know the word.
+| Technology | Purpose |
+|---|---|
+| Flutter | Cross-platform UI |
+| Dart | Application logic |
+| SharedPreferences | Local persistence |
+| Android | Primary mobile platform |
+| Web | Secondary supported platform |
 
-🛠️ Built With
-Technology	Purpose
-🐦 Flutter	Application framework
-🎯 Dart	Programming language
-🤖 Android	Primary platform
-🌐 Flutter Web	Web version
-💾 Local state	Game state
-📚 Word Database	Secret words & categories
-🚀 Getting Started
-Requirements
+---
 
-Install:
+## Project Structure
 
-Flutter SDK
-Dart SDK
-Android Studio
-Android SDK
-Android device or emulator
-
-Check your Flutter installation:
-
-flutter doctor
-
-Check connected devices:
-
-flutter devices
-📦 Install
-
-Clone the repository:
-
-git clone https://github.com/mhdsahil1/Who_Knows
-cd who_knows
-
-Install dependencies:
-
-flutter pub get
-📱 Run on Android
-
-Connect an Android device with USB debugging enabled.
-
-flutter devices
-
-Then:
-
-flutter run -d CPH2665
-
-Replace CPH2665 with your device ID.
-
-🌐 Run on Web
-
-Chrome:
-
-flutter run -d chrome
-
-Edge:
-
-flutter run -d edge
-🧪 Development
-
-Run static analysis:
-
-flutter analyze
-
-Run tests:
-
-flutter test
-📂 Project Structure
+```text
 who_knows/
+│
+├── assets/
+│   ├── icon/
+│   ├── images/
+│   └── videos/
+│
+├── lib/
+│   ├── models/
+│   ├── screens/
+│   ├── services/
+│   ├── widgets/
+│   └── ...
+│
+├── test/
 │
 ├── android/
 ├── web/
-├── assets/
-│   └── icon/
-│       └── icon_adaptive_foreground_trans.png
 │
-├── lib/
-│   ├── main.dart
-│   ├── app.dart
-│   │
-│   ├── models/
-│   ├── game/
-│   ├── screens/
-│   ├── widgets/
-│   ├── data/
-│   ├── services/
-│   └── constants/
-│
-├── test/
 ├── pubspec.yaml
 └── README.md
-🧭 Project Status
-🚧 Active Development
-
-Current baseline:
-
-Flutter              ✅
-Android              ✅
-Physical device      ✅
-Game playable        ✅
-Web                  ✅
-Word database        ✅
-Pass-and-play        ✅
-Chaos Mode           🚧
-Chaos Words          🚧
-UI redesign          🚧
-Final branding       🚧
-🛡️ Stable Checkpoints
-
-Before making major changes:
-
-git status
-
-Then create a checkpoint:
-
-git add .
-git commit -m "chore: stable working checkpoint"
-git push
-
-The stable checkpoint should always represent a version that successfully builds and runs on the Android test device.
-
-🗺️ Roadmap
- Basic game engine
- Player setup
- Secret role reveal
- Discussion phase
- Collective voting
- Final Guess system
- Category selection
- Physical Android testing
- Final launcher icon integration
- Android adaptive icon
- Web favicon
- Major UI/UX redesign
- Gesture-based secret reveal
- Animated countdown
- Chaos Mode refinement
- Chaos Words
- Expand word database
- Remove obsolete difficulty-tier system
- More gameplay testing
- Release build
-🤝 Contributing
-
-This is currently a personal/fun development project.
-
-If you contribute:
-
-Keep the game simple.
-Don't break the pass-and-play experience.
-Don't turn the app into a chat application.
-Don't add unnecessary online dependencies.
-Keep secret information private.
-Keep the visual identity recognizable.
-Test on Android before submitting major changes.
-📜 License
-
-License information will be added when the project's distribution model is finalized.
-
 ```
+
+---
+
+## Startup Experience
+
+The application opens with the SARCODE studio animation before transitioning into the Who Knows! game identity.
+
+```text
+┌─────────────────────┐
+│                     │
+│       SARCODE       │
+│                     │
+│  Build Beyond Ideas │
+│                     │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│                     │
+│     WHO KNOWS!      │
+│                     │
+└──────────┬──────────┘
+           │
+           ▼
+      HOME SCREEN
+```
+
+The startup sequence establishes the studio identity before entering the game.
+
+---
+
+## Download
+
+### Android
+
+Download the latest Android APK from GitHub Releases.
+
+<div align="center">
+
+<a href="https://github.com/mhdsahil/Who_Knows/releases">
+  <img src="https://img.shields.io/badge/Download-Latest%20Android%20APK-000000?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
+</a>
+
+</div>
+
+### Installation
+
+1. Download the latest `.apk`.
+2. Open the APK on your Android device.
+3. Allow installation from the required source if Android asks.
+4. Install the application.
+5. Launch **Who Knows!**
+
+The application is currently distributed independently and is not available through Google Play.
+
+---
+
+## Web
+
+The web version is also supported.
+
+<div align="center">
+
+
+Sorry!!!...Not Yet 
+
+  <img src="https://img.shields.io/badge/Play-Online-4DB6FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Play Online"/>
+</a>
+
+</div>
+
+---
+
+## Development
+
+### Requirements
+
+- Flutter 3.47.4 or compatible version
+- Dart SDK
+- Android Studio or VS Code
+- Android SDK
+- Chrome for Web development
+
+### Run Locally
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+
+cd who_knows
+
+flutter pub get
+
+flutter run
+```
+
+### Run on Chrome
+
+```bash
+flutter run -d chrome
+```
+
+### Run on Android
+
+```bash
+flutter devices
+
+flutter run -d <device-id>
+```
+
+---
+
+## Testing
+
+### Static Analysis
+
+```bash
+flutter analyze
+```
+
+### Run Tests
+
+```bash
+flutter test
+```
+
+### Build Release APK
+
+```bash
+flutter build apk --release
+```
+
+The release APK will be generated at:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+---
+
+## Roadmap
+
+### Completed
+
+- [x] Local pass-and-play gameplay
+- [x] Imposter system
+- [x] Multiple Imposters
+- [x] Classic Mode
+- [x] One-Shot Vote
+- [x] Chaos Mode
+- [x] Chaos Words
+- [x] Final Guess
+- [x] Custom My Words
+- [x] Associated Words
+- [x] Dynamic categories
+- [x] Starting Player
+- [x] Can Imposter Start
+- [x] Imposters Know Each Other
+- [x] Up to 20 players
+- [x] Android release build
+- [x] Web support
+- [x] SARCODE startup branding
+
+### Planned
+
+- [ ] Additional game modes
+- [ ] More word categories
+- [ ] More customization
+- [ ] Additional visual polish
+- [ ] Future platform expansion
+
+---
+
+## Contributing
+
+Contributions, suggestions, bug reports, and improvements are welcome.
+
+If you find a bug or have an idea for improving the game:
+
+1. Open an issue.
+2. Describe the problem or feature clearly.
+3. Include reproduction steps where applicable.
+4. Submit a pull request for implementation changes.
+
+---
+
+## License
+
+This project is currently distributed under the license specified in the repository.
+
+See [`LICENSE`](LICENSE) for details.
+
+---
+
+<div align="center">
+
+<img src="assets/icon/icon_adaptive_foreground_solid.png" alt="Who Knows!" width="90"/>
+
+# WHO KNOWS!
+
+**Think. Bluff. Accuse.**
+
+<br>
+
+Built by **SARCODE**
+
+### Build Beyond Ideas.
+
+<br>
+
+<a href="https://github.com/mhdsahil/Who_Knows">
+  <img src="https://img.shields.io/badge/GitHub-Repository-111111?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository"/>
+</a>
+
+</div>m

@@ -100,3 +100,6 @@ app.*.map.json
 .stitch/
 .widget_preview/
 
+**/assets/videos/
+**/lib/screens/intro_screen.dart
+**/test/intro/

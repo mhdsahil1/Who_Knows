@@ -37,6 +37,7 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
   google_fonts: ^8.2.1
+  video_player: ^2.14.0
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/videos/sarcode.mp4
+    - assets/videos/who knows.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

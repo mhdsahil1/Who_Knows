@@ -8,6 +8,7 @@ import 'screens/final_guess_screen.dart';
 import 'screens/game_over_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/how_to_play_screen.dart';
+import 'screens/intro_screen.dart';
 import 'screens/player_setup_screen.dart';
 import 'screens/role_reveal_screen.dart';
 import 'screens/settings_screen.dart';
@@ -17,7 +18,12 @@ import 'theme/app_theme.dart';
 
 /// Root app widget. Provides GameEngine via Provider and routes by game phase.
 class WhoKnowsApp extends StatelessWidget {
-  const WhoKnowsApp({super.key});
+  final bool skipIntro;
+
+  const WhoKnowsApp({
+    super.key,
+    this.skipIntro = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +31,14 @@ class WhoKnowsApp extends StatelessWidget {
       title: 'Who Knows!',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const _GameRouter(),
+      home: skipIntro ? const GameRouter() : const IntroScreen(),
     );
   }
 }
 
 /// Routes to the correct screen based on the current game phase.
-class _GameRouter extends StatelessWidget {
-  const _GameRouter();
+class GameRouter extends StatelessWidget {
+  const GameRouter({super.key});
 
   @override
   Widget build(BuildContext context) {
