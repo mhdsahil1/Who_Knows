@@ -405,7 +405,7 @@ Download the latest Android APK from GitHub Releases.
 
 <div align="center">
 
-<a href="https://github.com/mhdsahil/Who_Knows/releases">
+<a href="https://github.com/mhdsahil1/Who_Knows/releases">
   <img src="https://img.shields.io/badge/Download-Latest%20Android%20APK-000000?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK"/>
 </a>
 
@@ -452,7 +452,7 @@ Sorry!!!...Not Yet
 ### Run Locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/mhdsahil1/Who_Knows.git
 
 cd who_knows
 
@@ -575,7 +575,7 @@ Built by **SARCODE**
 
 <br>
 
-<a href="https://github.com/mhdsahil/Who_Knows">
+<a href="https://github.com/mhdsahil1/Who_Knows">
   <img src="https://img.shields.io/badge/GitHub-Repository-111111?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository"/>
 </a>
 
